@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  agentgpt_db:
+    image: mysql:8.0
+    container_name: agent_db
+    restart: always
+    build:
+      context: ./db
+    ports:
+      - "4000:3307"
+    environment:
+      MYSQL_DATABASE: "agent_backend"
+      MYSQL_USER: "agent_backend"
+      MYSQL_PASSWORD: "agent_backend"
+      MYSQL_ROOT_PASSWORD: "agent_backend"
+      MYSQL_TCP_PORT: 3307
+    volumes:
+      - agentgpt_db:/var/lib/mysql
+    command: [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci' ]
+
+volumes:
+  agentgpt_db:
