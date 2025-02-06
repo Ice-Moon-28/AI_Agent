@@ -29,6 +29,7 @@ def get_app() -> FastAPI:
         openapi_url="/api/openapi.json",
         default_response_class=UJSONResponse,
     )
+    
     async def http_exception_handler(request, exc: HTTPException):
         logger.debug(f"HTTP error occurred: {exc.detail} {request}")
         

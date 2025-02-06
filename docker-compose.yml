@@ -1,12 +1,10 @@
-version: '3.9'
-
 services:
   agentgpt_db:
     image: mysql:8.0
     container_name: agent_db
     restart: always
     build:
-      context: ./db
+      context: ./database
     ports:
       - "4000:3307"
     environment:
@@ -19,5 +17,23 @@ services:
       - agentgpt_db:/var/lib/mysql
     command: [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci' ]
 
+  mongodb:
+    container_name: mongodb_container
+    image: mongo:latest
+    restart: always
+    build:
+      context: ./mongodb
+    ports:
+      - "27000:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: agent_backend
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+      - ./mongodb/setup.js:/docker-entrypoint-initdb.d/setup.js
+
 volumes:
+  mongo_data:
+  mongo_config:
   agentgpt_db:

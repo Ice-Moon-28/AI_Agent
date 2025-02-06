@@ -1,11 +1,11 @@
 
 from fastapi import APIRouter, Body, Depends
 
-from blog_backend_gpt.type.agent import AgentChat, AgentRunParams, AgentSummarize, AgentTaskAnalyzeParams, AgentTaskCreate, AgentTaskExecute, NewTasksResponse
+from blog_backend_gpt.type.agent import AgentChat, AgentRunParams, AgentSummarize, AgentTaskAnalyzeParams, AgentTaskCreate, AgentTaskExecute, AgentTaskRetrievaleParams, NewTasksResponse
 from blog_backend_gpt.web.api.agent.service.analysis import Analysis
 from blog_backend_gpt.web.api.agent.service.provider import get_agent_service
 from blog_backend_gpt.web.api.agent.service.service import AgentService
-from blog_backend_gpt.web.api.agent.util.valid import agent_analyze_validator, agent_chat_validator, agent_create_validator, agent_crud, agent_execute_validator, agent_start_validator, agent_summarize_validator, validate
+from blog_backend_gpt.web.api.agent.util.valid import agenrt_retrieve_validator, agent_analyze_validator, agent_chat_validator, agent_create_validator, agent_crud, agent_execute_validator, agent_start_validator, agent_summarize_validator, validate
 from fastapi.responses import StreamingResponse as FastAPIStreamingResponse
 from loguru import logger
 router = APIRouter()
@@ -34,6 +34,7 @@ async def analyze_tasks(
         task=req_body.task or "",
         tool_names=req_body.tool_names or [],
     )
+
 
 
 ## valid 用户信息 ==> 在对应的 run 任务下面 启动一个新run任务 ==> 用来执行具体的function任务
@@ -96,4 +97,13 @@ async def chat(
     return await agent_service.chat(
         message=req_body.message,
         results=req_body.results,
+    )
+
+@router.post("/retrieve")
+async def retrieve_tasks(
+    req_body: AgentTaskRetrievaleParams = Depends(agenrt_retrieve_validator),
+    agent_service: AgentService = Depends(get_agent_service(agenrt_retrieve_validator)),
+) -> Analysis:
+    return await agent_service.retrieval_document_agent(
+        goal=req_body.goal,
     )

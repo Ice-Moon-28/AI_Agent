@@ -16,8 +16,6 @@ def load_all_models() -> None:
         prefix="blog_backend_gpt.db.orm.",  # 指定模块路径前缀，需以 '.' 结尾
     )
 
-    logger.info(f"Loading {list(modules)} models from {package_dir}")
-
     # 导入模块
     for module in modules:
         __import__(module.name)  # noqa: WPS421

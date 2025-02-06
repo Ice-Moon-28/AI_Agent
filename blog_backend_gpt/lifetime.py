@@ -1,3 +1,4 @@
+import getpass
 from typing import Awaitable, Callable
 
 from fastapi import FastAPI
@@ -8,7 +9,7 @@ from blog_backend_gpt.db.util.meta import meta
 from blog_backend_gpt.db.util.create import load_all_models
 from blog_backend_gpt.db.util.engine import create_engine
 from blog_backend_gpt.services.tokenizer.service import init_tokenizer
-
+import os
 
 
 def _setup_db(app: FastAPI) -> None:  # pragma: no cover
@@ -60,6 +61,9 @@ def register_startup_event(
         _setup_db(app)
         init_tokenizer(app)
         await _create_tables()
+
+        os.environ["LANGSMITH_TRACING"] = "true"
+        os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
 
     return _startup
 

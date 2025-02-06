@@ -32,11 +32,14 @@ class AgentRunCreateParams(BaseModel):
 class AgentRunParams(AgentRunCreateParams):
     run_id: str = Field(default_factory=lambda: str(uuid4()))
 
+class AgentTaskRetrievaleParams(AgentRunParams):
+    task: str
 
 class AgentTaskAnalyzeParams(AgentRunParams):
     task: str
     tool_names: List[str] = Field(default=[])
     model_settings: ModelSettings = Field(default=ModelSettings())
+
 
 
 class AgentTaskExecute(AgentRunParams):
@@ -58,7 +61,6 @@ class AgentSummarize(AgentRunParams):
 class AgentChat(AgentRunParams):
     message: str
     results: List[str] = Field(default=[])
-
 
 class NewTasksResponse(BaseModel):
     run_id: str

@@ -184,3 +184,28 @@ chat_prompt = PromptTemplate(
     """,
     input_variables=["language"],
 )
+
+
+rag_summarization_prompt = PromptTemplate(
+    input_variables=["context_chunks", "question"],
+    template="""You must answer in the "{language}" language.
+You are an AI assistant that processes multiple retrieved text chunks to generate a structured summary.
+
+### Task:
+Given the retrieved text chunks and the user's question, **synthesize the most relevant information** into a structured, coherent summary. The summary should be concise, accurate, and directly relevant to answering the question.
+
+### Retrieved Text Chunks:
+{context_chunks}
+
+### User Question:
+{question}
+
+### Instructions:
+- Identify key points from the retrieved text that are relevant to answering the question.
+- Summarize and structure the information in a **concise format**, avoiding redundant details.
+- If the text chunks contain conflicting information, note the discrepancies.
+- If the retrieved information is insufficient, state that clearly.
+
+### Structured Context Summary:
+"""
+)

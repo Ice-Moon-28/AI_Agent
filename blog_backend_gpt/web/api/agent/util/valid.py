@@ -5,7 +5,7 @@ from loguru import logger
 from blog_backend_gpt.db.crud.agent import AgentCRUD
 from blog_backend_gpt.db.util.session import get_db_session
 from blog_backend_gpt.db.util.user import get_current_user
-from blog_backend_gpt.type.agent import AgentChat, AgentRunCreateParams, AgentRunParams, AgentSummarize, AgentTaskAnalyzeParams, AgentTaskCreate, AgentTaskExecute
+from blog_backend_gpt.type.agent import AgentChat, AgentRunCreateParams, AgentRunParams, AgentSummarize, AgentTaskAnalyzeParams, AgentTaskCreate, AgentTaskExecute, AgentTaskRetrievaleParams
 from blog_backend_gpt.type.user import UserBase
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -99,3 +99,14 @@ async def agent_chat_validator(
     crud: AgentCRUD = Depends(agent_crud),
 ) -> AgentChat:
     return await validate(body, crud, "chat")
+
+async def agenrt_retrieve_validator(
+    body: AgentTaskRetrievaleParams = Body(
+        example={
+            "goal": "Create business plan for a bagel company",
+            "run_id": '207d2cb2-ace8-4215-b1d9-212b7fd1ce32',
+        },
+    ),
+    crud: AgentCRUD = Depends(agent_crud),
+) -> AgentTaskRetrievaleParams:
+    return await validate(body, crud, "retrieve")

@@ -1,0 +1,14 @@
+FROM mongo:latest
+
+# 复制初始化脚本到 `/docker-entrypoint-initdb.d/`
+COPY setup.js /docker-entrypoint-initdb.d/setup.js
+
+
+# 设置工作目录
+WORKDIR /data/db
+
+# 暴露 MongoDB 默认端口
+EXPOSE 27017
+
+# 运行 MongoDB
+CMD ["mongod"]

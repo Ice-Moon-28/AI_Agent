@@ -18,7 +18,7 @@ from blog_backend_gpt.web.api.agent.service.analysis import Analysis, AnalysisAr
 from blog_backend_gpt.web.api.agent.service.service import AgentService
 from blog_backend_gpt.web.api.agent.tools.list_tools import get_default_tool, get_tool_from_name, get_tool_name, get_user_tools
 from blog_backend_gpt.web.api.agent.util.openai_helpers import call_model_with_handling, get_tool_function, openai_error_handler, parse_with_handling
-from blog_backend_gpt.web.api.agent.util.prompts import start_goal_prompt, create_tasks_prompt, analyze_task_prompt, chat_prompt
+from blog_backend_gpt.web.api.agent.util.prompts import start_goal_prompt, create_tasks_prompt, analyze_task_prompt, chat_prompt, rag_summarization_prompt
 from blog_backend_gpt.web.api.agent.util.summarize import summarize
 from blog_backend_gpt.web.api.agent.util.task_parser import TaskOutputParser
 from blog_backend_gpt.web.errors import OpenAIError
@@ -209,3 +209,32 @@ class OpenAIAgentService(AgentService):
             {"language": self.settings.language},
             media_type="text/event-stream",
         )
+    
+    ## get the related documents
+    async def retrieval_document_agent(self, *, goal):
+        prompt = ChatPromptTemplate.from_messages(
+            [SystemMessagePromptTemplate(prompt=rag_summarization_prompt)]
+        )
+
+        self.token_service.calculate_max_tokens(
+            self.model,
+            prompt.format_prompt(
+                goal=goal,
+                language=self.settings.language,
+            ).to_string(),
+        )
+
+        completion = await call_model_with_handling(
+            self.model,
+            ChatPromptTemplate.from_messages(
+                [SystemMessagePromptTemplate(prompt=rag_summarization_prompt)]
+            ),
+            {"goal": goal, "language": self.settings.language},
+            settings=self.settings,
+            callbacks=self.callbacks,
+        )
+
+        task_output_parser = TaskOutputParser(completed_tasks=[])
+        context = parse_with_handling(task_output_parser, completion.content)
+
+        return context

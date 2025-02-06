@@ -50,3 +50,10 @@ class AgentService(Protocol):
         results: List[str],
     ) -> FastAPIStreamingResponse:
         pass
+
+    async def retrieval_document_agent(
+        self,
+        *,
+        task: str,
+    ) -> FastAPIStreamingResponse:
+        pass
