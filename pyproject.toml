@@ -31,6 +31,8 @@ bs4 = "^0.0.2"
 datasets = "^3.2.0"
 langchain-chroma = "^0.2.1"
 faiss-cpu = "^1.10.0"
+sentence-transformers = "^3.4.1"
+langchain-huggingface = "^0.1.2"
 
 
 [build-system]

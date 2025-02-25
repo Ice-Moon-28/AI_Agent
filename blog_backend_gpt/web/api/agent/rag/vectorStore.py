@@ -67,24 +67,33 @@ from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
 
 
-def create_faiss_vector_store():
+def create_faiss_vector_store(isLoad=False, file_path=None, embeddings_type="ollama3"):
     import os
-    os.environ["OLLAMA_ACCELERATOR"] = "metal"
-    embeddings = get_embedding_text("ollama3")
+    os.environ["OMP_NUM_THREADS"] = "1"  # Restrict OpenMP threads
+    faiss.omp_set_num_threads(1)
+    embeddings = get_embedding_text(embeddings_type)
     index = faiss.IndexFlatL2(len(embeddings.embed_query("hello world")))
 
-    vector_store = FAISS(
-        embedding_function=embeddings,
-        index=index,
-        docstore=InMemoryDocstore(),
-        index_to_docstore_id={},
-    )
+    if isLoad:
+        vector_store = faiss_load_vector_store(embeddings, file_path)
+    else:
+        vector_store = FAISS(
+            embedding_function=embeddings,
+            index=index,
+            docstore=InMemoryDocstore(),
+            index_to_docstore_id={},
+        )
 
     return vector_store
 
-def create_vector_store(type: str='mongdb'):
+def create_vector_store(
+        type: str='mongdb',
+        file_path="",
+        isLoad=False,
+        embedding_type="ollama3",
+    ):
     if type == "faiss":
-        return create_faiss_vector_store()
+        return create_faiss_vector_store(isLoad, file_path, embeddings_type=embedding_type)
 
     if type == "mongdb":
         return create_mongdb_vector_store()
@@ -146,8 +155,8 @@ def faiss_save_vector_store(vector_store, file_path):
 
     print("✅ 向量内容保存完成！", file_path)
 
-def faiss_load_vector_store(file_path):
+def faiss_load_vector_store(embedding, file_path):
     print("✅ 向量内容加载完成！", file_path)
 
-    return FAISS.load_local(file_path)
+    return FAISS.load_local(file_path, embeddings=embedding, allow_dangerous_deserialization=True)
 
