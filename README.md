@@ -1,3 +1,7 @@
+# Project Description
+This project is the final project for COMP646 in Rice U.
+
+
 ## Init project
 1. run `poetry install` to install dependency of this project
 2. run `docker-compose up -d` or `docker compose up -d` to run the docker of mysql dataset
