@@ -1,5 +1,10 @@
-.env
+ .env
 test.**
 **.bin
 **.pyc
 **.dat
+blog_backend_gpt/.env
+
+# ignore all .pyc file
+**/*.pyc
+__pycache__/
