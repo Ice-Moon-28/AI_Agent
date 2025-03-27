@@ -3,3 +3,4 @@ test.**
 **.bin
 **.pyc
 **.dat
+blog_backend_gpt/.env
