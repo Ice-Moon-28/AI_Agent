@@ -34,7 +34,7 @@ def get_app() -> FastAPI:
         logger.debug(f"HTTP error occurred: {exc.detail} {request}")
         
         return JSONResponse(
-            status_code=exc.status_code,
+            status_code=exc.status_code,    
             content={"message": f"HTTP error occurred: {exc.detail}"},
         )
 
