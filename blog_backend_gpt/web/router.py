@@ -1,6 +1,6 @@
 from fastapi.routing import APIRouter
 
-from blog_backend_gpt.web.api import auth, monitor, mock
+from blog_backend_gpt.web.api import auth, monitor, mock, agent
 from blog_backend_gpt.web.api.agent.views import router
 
 

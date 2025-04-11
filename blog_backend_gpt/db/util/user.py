@@ -22,7 +22,7 @@ def user_crud(
 async def get_current_user(
     x_organization_id: Annotated[str | None, Header()] = None,
     bearer: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
-    crud: UserCrud = Depends(user_crud),
+    crud:   UserCrud = Depends(user_crud),
 ) -> UserBase:
     session_token = bearer.credentials
 
