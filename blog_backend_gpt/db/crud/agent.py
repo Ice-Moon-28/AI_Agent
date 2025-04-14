@@ -21,6 +21,7 @@ class AgentCRUD(BaseCrud):
             goal=goal,
         ).save(self.session)
 
+    # 检查run任务是否存在，并创建一个新的task任务
     async def create_task(self, run_id: str, type_: Loop_Step) -> AgentTask:
         await self.validate_task_count(run_id, type_)
         return await AgentTask(
@@ -28,6 +29,7 @@ class AgentCRUD(BaseCrud):
             type_=type_,
         ).save(self.session)
 
+    # 检查当前run任务是否存在，并且检查当前run任务下的task数量是否超过最大限制
     async def validate_task_count(self, run_id: str, type_: str) -> None:
         if not await AgentRun.get(self.session, run_id):
             logger.info(f"Run {run_id} not found")

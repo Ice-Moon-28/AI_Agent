@@ -27,7 +27,7 @@ def error_check() -> None:
     """
     raise Exception("This is an expected error from the error check endpoint!")
 
-@router.post("/seed-user", tags=["🔧 Dev"])
+@router.post("/seed-user")
 async def seed_test_user(session: AsyncSession = Depends(get_db_session)):
     # 设定用户 & token 信息
     test_user_id = "test-user-id"

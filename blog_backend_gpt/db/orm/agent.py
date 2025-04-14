@@ -3,6 +3,7 @@ from sqlalchemy.orm import mapped_column
 
 from blog_backend_gpt.db.base.base import Base
 
+# record agent run (whole process)
 class AgentRun(Base):
     __tablename__ = "agent_run"
 
@@ -12,7 +13,7 @@ class AgentRun(Base):
         DateTime, name="create_date", server_default=func.now(), nullable=False
     )
 
-
+# record a single task
 class AgentTask(Base):
     __tablename__ = "agent_task"
 

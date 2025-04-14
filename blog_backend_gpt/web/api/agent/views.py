@@ -16,6 +16,7 @@ router = APIRouter()
     "/start",
 )
 async def start_tasks(
+    # 在数据库中创建一个goal
     req_body: AgentRunParams = Depends(agent_start_validator),
     agent_service: AgentService = Depends(get_agent_service(agent_start_validator)),
 ) -> NewTasksResponse:
@@ -26,6 +27,7 @@ async def start_tasks(
 ## valid 用户的 session ==> 启动一个新分析 task任务 ===> 返回分析结果 分析结果为 Analysis 任务
 @router.post("/analyze")
 async def analyze_tasks(
+    # agent_analyze_validator: 验证以及在数据库中创造一个task任务
     req_body: AgentTaskAnalyzeParams = Depends(agent_analyze_validator),
     agent_service: AgentService = Depends(get_agent_service(agent_analyze_validator)),
 ) -> Analysis:

@@ -9,7 +9,7 @@ from blog_backend_gpt.web.api.agent.tools.search import Search
 from blog_backend_gpt.web.api.agent.tools.tools import Tool
 
 
-
+# 用于根据用户提供的工具名，返回用户当前可用的工具列表，并且会自动过滤掉用户当前不可用的工具。
 async def get_user_tools(
     tool_names: List[str], user: UserBase, crud: OAuthCrud
 ) -> List[Type[Tool]]:

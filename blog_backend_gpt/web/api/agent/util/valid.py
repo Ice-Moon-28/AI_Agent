@@ -17,6 +17,7 @@ def agent_crud(
     user: UserBase = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> AgentCRUD:
+    # get current user data and session
     return AgentCRUD(session, user)
 
 T = TypeVar(
@@ -43,6 +44,7 @@ async def agent_start_validator(
     logger.info("start_tasks req_body={}, id = {}".format(body.dict(), id_))
     return AgentRunParams(**body.dict(), run_id=str(id_))
 
+# 定义一个异步函数 agent_analyze_validator，用于验证分析任务请求的输入参数
 async def agent_analyze_validator(
     body: AgentTaskAnalyzeParams = Body(
         example={
@@ -64,7 +66,7 @@ async def agent_analyze_validator(
 
 async def agent_execute_validator(
     body: AgentTaskExecute = Body(
-        ## 仅仅是用于文档的生成
+        # 仅仅是用于文档的生成
         example={
             "goal": "Create business plan for a bagel company",
             "task": "Market research for bagel industry",

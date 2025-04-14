@@ -3,6 +3,7 @@ from langchain import PromptTemplate
 # Create initial tasks using plan and solve prompting
 # https://github.com/AGI-Edgerunners/Plan-and-Solve-Prompting
 start_goal_prompt = PromptTemplate(
+    # 将用户问题转换为搜索查询
     template="""You are a task creation AI called AgentGPT. 
 You answer in the "{language}" language. You have the following objective "{goal}". 
 Return a list of search queries that would be required to answer the entirety of the objective. 

@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse as FastAPIStreamingResponse
 from blog_backend_gpt.web.api.agent.service.analysis import Analysis
 
 
-
+# Interface for agent service
 class AgentService(Protocol):
     async def start_goal_agent(self, *, goal: str) -> List[str]:
         pass

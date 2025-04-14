@@ -19,7 +19,7 @@ from blog_backend_gpt.web.errors import OpenAIError
 
 T = TypeVar("T")
 
-
+# 将模型返回的json格式的字符串解析为任务列表
 def parse_with_handling(parser: BaseOutputParser[T], completion: str) -> T:
     try:
         return parser.parse(completion)
@@ -68,7 +68,7 @@ async def openai_error_handler(
             e, "There was an unexpected issue getting a response from the AI model."
         )
 
-
+# 使用Langchain的PromptTemplate和ChatOpenAI类，构建一个调用链（chain），并将用户输入的参数传递给模型，获取生成的结果。
 async def call_model_with_handling(
     model: BaseChatModel,
     prompt: langchain.BasePromptTemplate,
@@ -77,6 +77,7 @@ async def call_model_with_handling(
     **kwargs: Any,
 ) -> str:
     logger.info(f"Calling model: {model.model_name} {prompt} {args} {kwargs} {settings}")
+    # prompt接受参数 -> 交给model生成结果
     chain = prompt | model
     return await openai_error_handler(chain.ainvoke, args, settings=settings, **kwargs)
 
@@ -95,7 +96,7 @@ class FunctionDescription(TypedDict):
     parameters: dict[str, object]
     """The parameters of the function."""
 
-
+# 根据传入的工具类 tool，返回该工具的 函数调用描述（FunctionDescription）
 def get_tool_function(tool: Type[Tool]) -> FunctionDescription:
     """A function that will return the tool's function specification"""
     name = get_tool_name(tool)
