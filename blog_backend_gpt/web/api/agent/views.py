@@ -16,11 +16,11 @@ router = APIRouter()
     "/start",
 )
 async def start_tasks(
-    # 在数据库中创建一个goal
+    # create a new run task in the database
     req_body: AgentRunParams = Depends(agent_start_validator),
     agent_service: AgentService = Depends(get_agent_service(agent_start_validator)),
 ) -> NewTasksResponse:
-    new_tasks = await agent_service.start_goal_agent(goal=req_body.goal)
+    new_tasks = await agent_service.start_goal_agent(goal=req_body.goal, image_url=req_body.image_url or None)
     return NewTasksResponse(newTasks=new_tasks, run_id=req_body.run_id)
 
 

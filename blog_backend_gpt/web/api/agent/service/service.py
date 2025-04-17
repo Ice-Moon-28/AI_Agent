@@ -7,7 +7,7 @@ from blog_backend_gpt.web.api.agent.service.analysis import Analysis
 
 # Interface for agent service
 class AgentService(Protocol):
-    async def start_goal_agent(self, *, goal: str) -> List[str]:
+    async def start_goal_agent(self, *, goal: str, image_url: Optional[str] = None) -> List[str]:
         pass
 
     async def analyze_task_agent(

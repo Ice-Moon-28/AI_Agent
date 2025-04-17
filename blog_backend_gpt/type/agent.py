@@ -23,11 +23,31 @@ class ModelSettings(BaseModel):
             raise ValueError(f"Model {model} only supports {max_tokens} tokens")
         return v
 
+class VisionModelSetting(BaseModel):
+    model: str = Field(default="gpt-4o-mini")  # 支持多模态的模型
+    custom_api_key: Optional[str] = Field(default=None)
+    temperature: float = Field(default=0.9, ge=0.0, le=1.0)
+    max_tokens: int = Field(default=1000, ge=0)
+    language: str = Field(default="English")
+
+    @validator("max_tokens")
+    def validate_max_tokens(cls, v: float, values: Dict[str, Any]) -> float:
+        model = values.get("model", "gpt-4o-mini")
+        allowed = {
+            "gpt-4o-mini": 4096,
+            # more models can be added here
+        }
+        if model not in allowed:
+            raise ValueError(f"Model {model} not supported for image reasoning")
+        if v > allowed[model]:
+            raise ValueError(f"Model {model} only supports {allowed[model]} tokens")
+        return v
 
 class AgentRunCreateParams(BaseModel):
     goal: str
     model_settings: ModelSettings = Field(default=ModelSettings())
-
+    vision_model_settings: Optional[VisionModelSetting] = Field(default=VisionModelSetting())
+    image_url: Optional[str] = Field(default=None)
 
 class AgentRunParams(AgentRunCreateParams):
     run_id: str = Field(default_factory=lambda: str(uuid4()))

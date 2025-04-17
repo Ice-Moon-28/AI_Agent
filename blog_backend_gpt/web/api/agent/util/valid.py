@@ -33,10 +33,14 @@ async def validate(body: T, crud: AgentCRUD, type_: Loop_Step) -> T:
 async def agent_start_validator(
     body: AgentRunCreateParams = Body(
         example={
-            "goal": "Create business plan for a bagel company",
+            "goal": "Make a dish using the food in the picture",
             "modelSettings": {
                 "customModelName": "gpt-3.5-turbo",
             },
+            "visionModelSettings": {
+                "customModelName": "gpt-4o-mini",
+            },
+            "image_url": "https://agentgptimages.s3.us-east-1.amazonaws.com/uploads/76d71edb-e720-450c-878d-4e57b0a922e1.jpg",
         },
     ),
     crud: AgentCRUD = Depends(agent_crud),

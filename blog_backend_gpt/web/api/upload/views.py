@@ -40,4 +40,4 @@ async def upload_image(image: UploadFile = File(...)):
     # 4. Save the image on AWS S3 Bucket
     url = upload_file_to_s3(image)
 
-    return {"url": url, "filename": image.filename, "size": size_in_mb}
+    return {"url": url, "filename": image.filename, "size(MB)": size_in_mb}

@@ -74,16 +74,41 @@ class TokenService:
     def count(self, text: str) -> int:
         return len(self.tokenize(text))
 
-    def get_completion_space(self, model: LLM_Model, *prompts: str) -> int:
+    def count_image_token(self, image_count: int = 1) -> int:
+        # same as before
+        average_tokens_per_image = 170
+        return image_count * average_tokens_per_image
+
+    def get_completion_space(
+        self,
+        model: LLM_Model,
+        *prompts: str,
+        image_count: int = 0
+    ) -> int:
         max_allowed_tokens = LLM_MODEL_MAX_TOKENS.get(model, 4000)
-        prompt_tokens = sum([self.count(p) for p in prompts])
-        return max_allowed_tokens - prompt_tokens
+        prompt_tokens = sum(self.count(p) for p in prompts)
+        image_tokens = self.count_image_token(image_count)
+        return max_allowed_tokens - prompt_tokens - image_tokens
 
-    def calculate_max_tokens(self, model: WrappedChatOpenAI, *prompts: str) -> None:
-        requested_tokens = self.get_completion_space(model.model_name, *prompts)
+    def calculate_max_tokens(
+        self,
+        model: WrappedChatOpenAI,
+        *prompts: str,
+        image_count: int = 0
+    ) -> None:
+        """
+        Backward‑compatible: you can still do
+            calculate_max_tokens(model, prompt_str)
+        or, if you want to count a single image:
+            calculate_max_tokens(model, prompt_str, image_count=1)
+        """
+        # collect tokens needed
+        requested = self.get_completion_space(model.model_name, *prompts, image_count=image_count)
 
-        model.max_tokens = min(model.max_tokens, requested_tokens)
+        # clamp into [1, model.max_tokens]
+        model.max_tokens = min(model.max_tokens, requested)
         model.max_tokens = max(model.max_tokens, 1)
+
 
 
 def get_token_service(request: Request) -> TokenService:

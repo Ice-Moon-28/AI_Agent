@@ -1,7 +1,8 @@
-from typing import Any, Callable, Dict, TypeVar
+from typing import Any, Callable, Dict, TypeVar, Optional
 
 import langchain
 from langchain.chat_models.base import BaseChatModel
+from langchain.schema import SystemMessage, HumanMessage, AIMessage
 from langchain.schema import BaseOutputParser, OutputParserException
 from loguru import logger
 from openai import (
@@ -69,18 +70,57 @@ async def openai_error_handler(
         )
 
 # 使用Langchain的PromptTemplate和ChatOpenAI类，构建一个调用链（chain），并将用户输入的参数传递给模型，获取生成的结果。
+# async def call_model_with_handling(
+#     model: BaseChatModel,
+#     prompt: langchain.BasePromptTemplate,
+#     args: Dict[str, str],
+#     settings: ModelSettings,
+#     **kwargs: Any,
+# ) -> str:
+#     logger.info(f"Calling model: {model.model_name} {prompt} {args} {kwargs} {settings}")
+#     # prompt接受参数 -> 交给model生成结果
+#     chain = prompt | model
+#     return await openai_error_handler(chain.ainvoke, args, settings=settings, **kwargs)
+
 async def call_model_with_handling(
     model: BaseChatModel,
     prompt: langchain.BasePromptTemplate,
-    args: Dict[str, str],
+    args: dict,
     settings: ModelSettings,
-    **kwargs: Any,
-) -> str:
-    logger.info(f"Calling model: {model.model_name} {prompt} {args} {kwargs} {settings}")
-    # prompt接受参数 -> 交给model生成结果
-    chain = prompt | model
-    return await openai_error_handler(chain.ainvoke, args, settings=settings, **kwargs)
+    callbacks: Optional[list] = None,
+    image_url: Optional[str] = None,
+    **kwargs,
+) -> Any:
+    # 先格式化 prompt 文本
+    sys_content = prompt.format_prompt(**args).to_string()
+    system_msg = SystemMessage(content=sys_content)
 
+    if image_url:
+        # 带图的用户消息
+        human_msg = HumanMessage(
+            content=[
+                {"type": "image_url", "image_url": {"url": image_url}}
+            ]
+        )
+        return await openai_error_handler(
+            model.ainvoke,
+            [system_msg, human_msg],
+            settings=settings,
+            # callbacks=callbacks,
+            **kwargs
+        )
+
+    # 纯文本分支不变
+    else:
+        # 纯文本分支：先拿到 RunnableSequence，再调用它的 ainvoke 方法
+        chain = prompt | model
+        return await openai_error_handler(
+            chain.ainvoke,      # 注意这里用 ainvoke
+            args,               # 原来的 args 字典
+            settings=settings,
+            # callbacks=callbacks,
+            **kwargs
+        )
 
 from typing import Type, TypedDict
 

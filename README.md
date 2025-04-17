@@ -29,8 +29,8 @@ Click the "Authorize button", enter "test-token-abc123" then click "Authorize" t
 
 
 
-1. 上传图片至 AWS S3 buckets，获得公网URL
+1. 上传图片至 AWS S3 buckets，获得公网URL （上传最大限制为10MB）
 
 
 
-2. 
+2. 附带图片请求/start接口，使用 gpt-40-mini
