@@ -33,6 +33,7 @@ langchain-chroma = "^0.2.1"
 faiss-cpu = "^1.10.0"
 sentence-transformers = "^3.4.1"
 langchain-huggingface = "^0.1.2"
+boto3 = "^1.37.35"
 
 
 [build-system]

@@ -1,0 +1,17 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 4000,
+            "driver": "MySQL",
+            "database": "agent_backend",
+            "username": "agent_backend",
+            "name": "agent_backend"
+        }
+    ]
+}

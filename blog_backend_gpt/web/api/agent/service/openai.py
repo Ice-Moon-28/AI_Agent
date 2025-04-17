@@ -140,6 +140,7 @@ class OpenAIAgentService(AgentService):
             self.oauth_crud,
         )
 
+    # 让agent 根据上一个任务的结果和当前目标自动生成一个新的子任务
     async def create_tasks_agent(
         self,
         *,
