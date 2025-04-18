@@ -4,7 +4,7 @@ from langchain_community.chat_models import AzureChatOpenAI, ChatOpenAI
 from pydantic import Field
 
 from blog_backend_gpt.settings import Settings
-from blog_backend_gpt.type.agent import ModelSettings, LLM_Model
+from blog_backend_gpt.type.agent import ModelSettings, LLM_Model, VisionModelSetting
 from blog_backend_gpt.type.user import UserBase
 
 
@@ -95,3 +95,32 @@ def get_base_and_headers(
     )
 
     return base, headers, use_helicone
+
+
+def create_vision_model(
+    settings: Settings,
+    vision_model_settings: VisionModelSetting,
+    user: UserBase,
+    streaming: bool = False,
+    force_model: Optional[str] = None,
+) -> WrappedChatOpenAI:
+    """
+    构建支持图文多模态推理的 OpenAI 模型（如 gpt-4o-mini)
+    """
+
+    llm_model = force_model or vision_model_settings.model  # 通常是 "gpt-4o"
+    model = WrappedChatOpenAI
+
+    base, headers, use_helicone = get_base_and_headers(settings, vision_model_settings, user)
+
+    kwargs = {
+        "openai_api_base": base,
+        "openai_api_key": vision_model_settings.custom_api_key or settings.openai_api_key,
+        "temperature": vision_model_settings.temperature,
+        "model": llm_model,
+        "max_tokens": vision_model_settings.max_tokens,
+        "streaming": streaming,
+        "max_retries": 5,
+    }
+
+    return model(**kwargs)

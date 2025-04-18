@@ -17,6 +17,7 @@ def agent_crud(
     user: UserBase = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> AgentCRUD:
+    # get current user data and session
     return AgentCRUD(session, user)
 
 T = TypeVar(
@@ -25,16 +26,21 @@ T = TypeVar(
 
 
 async def validate(body: T, crud: AgentCRUD, type_: Loop_Step) -> T:
+    # 存数据库中，创建一个新的任务
     body.run_id = (await crud.create_task(body.run_id, type_)).id
     return body
 
 async def agent_start_validator(
     body: AgentRunCreateParams = Body(
         example={
-            "goal": "Create business plan for a bagel company",
+            "goal": "Make a dish using the food in the picture",
             "modelSettings": {
                 "customModelName": "gpt-3.5-turbo",
             },
+            "visionModelSettings": {
+                "customModelName": "gpt-4o-mini",
+            },
+            "image_url": "https://agentgptimages.s3.us-east-1.amazonaws.com/uploads/76d71edb-e720-450c-878d-4e57b0a922e1.jpg",
         },
     ),
     crud: AgentCRUD = Depends(agent_crud),
@@ -43,6 +49,7 @@ async def agent_start_validator(
     logger.info("start_tasks req_body={}, id = {}".format(body.dict(), id_))
     return AgentRunParams(**body.dict(), run_id=str(id_))
 
+# 定义一个异步函数 agent_analyze_validator，用于验证分析任务请求的输入参数
 async def agent_analyze_validator(
     body: AgentTaskAnalyzeParams = Body(
         example={
@@ -63,8 +70,8 @@ async def agent_analyze_validator(
     return await validate(body, crud, "analyze")
 
 async def agent_execute_validator(
+    # 解析对象，example数据用于swagger文档的生成
     body: AgentTaskExecute = Body(
-        ## 仅仅是用于文档的生成
         example={
             "goal": "Create business plan for a bagel company",
             "task": "Market research for bagel industry",
@@ -78,8 +85,10 @@ async def agent_execute_validator(
     ),
     crud: AgentCRUD = Depends(agent_crud),
 ) -> AgentTaskExecute:
+    # 创立一个execute数据，如果 run_id 存在，则正常返回
     return await validate(body, crud, "execute")
 
+# 存入一个create task进入agent_task表中
 async def agent_create_validator(
     body: AgentTaskCreate = Body(),
     crud: AgentCRUD = Depends(agent_crud),

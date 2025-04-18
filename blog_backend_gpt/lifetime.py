@@ -63,7 +63,7 @@ def register_startup_event(
         await _create_tables()
 
         os.environ["LANGSMITH_TRACING"] = "true"
-        os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
+        # os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
 
     return _startup
 

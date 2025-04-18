@@ -93,6 +93,11 @@ class Settings(BaseSettings):
     # openai_api_version: str = "2023-08-01-preview"
     # azure_openai_deployment_name: str = "<Should be updated via env if using azure>"
 
+    aws_region: str
+    aws_s3_bucket: str
+    aws_access_key_id: str
+    aws_secret_access_key: str
+
     # # Helicone
     helicone_api_base: str = "https://oai.hconeai.com/v1"
     helicone_api_key: Optional[str] = None

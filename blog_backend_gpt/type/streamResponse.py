@@ -181,7 +181,8 @@ class MyStreamingResponse(_StreamingResponse):
 
         await send({"type": "http.response.body", "body": b"", "more_body": False})
 
-    @openai_aiosession
+    # 如果不注释会出现openai版本错误
+    # @openai_aiosession
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         async def wrap(func: Callable[[], Awaitable[None]]) -> None:
             await func()

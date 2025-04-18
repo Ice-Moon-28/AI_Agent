@@ -9,7 +9,7 @@ from blog_backend_gpt.services.tokenizer.service import TokenService, get_token_
 from blog_backend_gpt.settings import settings
 from blog_backend_gpt.type.agent import AgentRunParams
 from blog_backend_gpt.type.user import UserBase
-from blog_backend_gpt.web.api.agent.model import create_model
+from blog_backend_gpt.web.api.agent.model import create_model, create_vision_model
 from blog_backend_gpt.web.api.agent.service.mock import MockAgentService
 from blog_backend_gpt.web.api.agent.service.openai import OpenAIAgentService
 from blog_backend_gpt.web.api.agent.service.service import AgentService
@@ -33,13 +33,22 @@ def get_agent_service(
         if settings.ff_mock_mode_enabled:
             return MockAgentService()
 
-        model = create_model(
-            settings,
-            run.model_settings,
-            user,
-            streaming=streaming,
-            force_model=llm_model,
-        )
+        if run.image_url and run.vision_model_settings:
+            model = create_vision_model(
+                settings=settings,
+                vision_model_settings=run.vision_model_settings,
+                user=user,
+                streaming=streaming,
+                force_model=llm_model,
+            )
+        else:
+            model = create_model(
+                settings=settings,
+                model_settings=run.model_settings,
+                user=user,
+                streaming=streaming,
+                force_model=llm_model,
+            )
 
         return OpenAIAgentService(
             model,

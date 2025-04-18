@@ -9,7 +9,7 @@ from blog_backend_gpt.web.api.agent.tools.search import Search
 from blog_backend_gpt.web.api.agent.tools.tools import Tool
 
 
-
+# 用于根据用户提供的工具名，返回用户当前可用的工具列表，并且会自动过滤掉用户当前不可用的工具。
 async def get_user_tools(
     tool_names: List[str], user: UserBase, crud: OAuthCrud
 ) -> List[Type[Tool]]:
@@ -63,7 +63,7 @@ def get_tools_overview(tools: List[Type[Tool]]) -> str:
     # Join the unique strings with newlines
     return "\n".join(unique_strings)
 
-
+# 根据传入的工具名称，返回对应的工具类实例
 def get_tool_from_name(tool_name: str) -> Type[Tool]:
     for tool in get_available_tools():
         if get_tool_name(tool) == format_tool_name(tool_name):

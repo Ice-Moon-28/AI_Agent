@@ -18,12 +18,12 @@ from blog_backend_gpt.web.api.agent.service.analysis import Analysis, AnalysisAr
 from blog_backend_gpt.web.api.agent.service.service import AgentService
 from blog_backend_gpt.web.api.agent.tools.list_tools import get_default_tool, get_tool_from_name, get_tool_name, get_user_tools
 from blog_backend_gpt.web.api.agent.util.openai_helpers import call_model_with_handling, get_tool_function, openai_error_handler, parse_with_handling
-from blog_backend_gpt.web.api.agent.util.prompts import start_goal_prompt, create_tasks_prompt, analyze_task_prompt, chat_prompt, rag_summarization_prompt
+from blog_backend_gpt.web.api.agent.util.prompts import start_goal_prompt, start_goal_with_image_prompt, create_tasks_prompt, analyze_task_prompt, chat_prompt, rag_summarization_prompt
 from blog_backend_gpt.web.api.agent.util.summarize import summarize
 from blog_backend_gpt.web.api.agent.util.task_parser import TaskOutputParser
 from blog_backend_gpt.web.errors import OpenAIError
 
-
+# An implementation of the AgentService interface for OpenAI models
 class OpenAIAgentService(AgentService):
     def __init__(
         self,
@@ -41,52 +41,75 @@ class OpenAIAgentService(AgentService):
         self.user = user
         self.oauth_crud = oauth_crud
 
-    async def start_goal_agent(self, *, goal: str) -> List[str]:
-        prompt = ChatPromptTemplate.from_messages(
-            [SystemMessagePromptTemplate(prompt=start_goal_prompt)]
+    async def start_goal_agent(self, *, goal: str, image_url: Optional[str] = None) -> List[str]:
+        # 构造prompt模板, 将用户问题转换为适合查询的问题
+        # judge wheather the model is vision model or not
+        if image_url:
+            prompt = ChatPromptTemplate.from_messages(
+            [SystemMessagePromptTemplate(prompt=start_goal_with_image_prompt)]
         )
+            prompt_variables = {
+                "goal": goal,
+                "image_url": image_url,
+                "language": self.settings.language,
+            }
+        else:
+            prompt = ChatPromptTemplate.from_messages(
+                [SystemMessagePromptTemplate(prompt=start_goal_prompt)]
+            )
+            prompt_variables = {
+                "goal": goal,
+                "language": self.settings.language,
+            }
 
+        # 更新模型的 max_tokens 参数
         self.token_service.calculate_max_tokens(
             self.model,
-            prompt.format_prompt(
-                goal=goal,
-                language=self.settings.language,
-            ).to_string(),
+            prompt.format_prompt(**prompt_variables).to_string(),
+            image_count=1 if image_url else 0,  # 如果有图片，则计算图片的 token 数量
         )
 
+        # 调用模型生成任务清单（task list），通过构造好的 prompt 和调用链，向模型发送请求，并返回生成结果。
         completion = await call_model_with_handling(
             self.model,
-            ChatPromptTemplate.from_messages(
-                [SystemMessagePromptTemplate(prompt=start_goal_prompt)]
-            ),
-            {"goal": goal, "language": self.settings.language},
+            prompt,
+            prompt_variables,
             settings=self.settings,
             callbacks=self.callbacks,
+            image_url=image_url,  # 如果有图片，则传递图片 URL
         )
 
+        # 解析模型返回的任务清单，返回一个任务列表
         task_output_parser = TaskOutputParser(completed_tasks=[])
-        tasks = parse_with_handling(task_output_parser, completion.content)
+        tasks = parse_with_handling(task_output_parser, completion if isinstance(completion, str) else completion.content)
 
         return tasks
 
     async def analyze_task_agent(
         self, *, goal: str, task: str, tool_names: List[str]
     ) -> Analysis:
+        # return a usable tools list
         user_tools = await get_user_tools(tool_names, self.user, self.oauth_crud)
+        # 把用户可用的工具类列表 user_tools 转换为 OpenAI function calling 所需的标准函数描述列表。
         functions = list(map(get_tool_function, user_tools))
+        
+        # 构造 prompt 模板
         prompt = analyze_task_prompt.format_prompt(
             goal=goal,
             task=task,
             language=self.settings.language,
         )
 
+        # 保证整个上下文（输入的 token + 生成的 token）必须不超过模型的最大 token 限制
         self.token_service.calculate_max_tokens(
             self.model,
             prompt.to_string(),
             str(functions),
         )
 
+        # 调用模型
         message = await openai_error_handler(
+            # apredict: 模型类专属调用
             func=self.model.apredict_messages,
             messages=prompt.to_messages(),
             functions=functions,
@@ -94,10 +117,12 @@ class OpenAIAgentService(AgentService):
             callbacks=self.callbacks,
         )
 
+        # 取出函数调用的参数
         function_call = message.additional_kwargs.get("function_call", {})
         completion = function_call.get("arguments", "")
 
         try:
+            # 返回分析结果
             pydantic_parser = PydanticOutputParser(pydantic_object=AnalysisArguments)
             analysis_arguments = parse_with_handling(pydantic_parser, completion)
             return Analysis(
@@ -127,6 +152,7 @@ class OpenAIAgentService(AgentService):
             self.oauth_crud,
         )
 
+    # 让agent 根据上一个任务的结果和当前目标自动生成一个新的子任务
     async def create_tasks_agent(
         self,
         *,

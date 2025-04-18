@@ -18,12 +18,25 @@ def user_crud(
 ) -> UserCrud:
     return UserCrud(session)
 
-
 async def get_current_user(
     x_organization_id: Annotated[str | None, Header()] = None,
     bearer: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
-    crud: UserCrud = Depends(user_crud),
+    crud:   UserCrud = Depends(user_crud),
 ) -> UserBase:
+    """
+    Retrieve the current authenticated user based on the Bearer token.
+
+    This function extracts the session token from the Authorization header,
+    verifies its validity and expiration, and then returns the associated user's information.
+
+    Args:
+        x_organization_id (str | None): Optional organization ID from request header.
+        bearer (HTTPAuthorizationCredentials): Authorization credentials extracted via HTTP Bearer scheme.
+        crud (UserCrud): Database CRUD operations handler for users and sessions.
+
+    Returns:
+        UserBase: The base information of the authenticated user.
+    """
     session_token = bearer.credentials
 
     try:

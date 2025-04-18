@@ -16,16 +16,18 @@ router = APIRouter()
     "/start",
 )
 async def start_tasks(
+    # create a new run task in the database
     req_body: AgentRunParams = Depends(agent_start_validator),
     agent_service: AgentService = Depends(get_agent_service(agent_start_validator)),
 ) -> NewTasksResponse:
-    new_tasks = await agent_service.start_goal_agent(goal=req_body.goal)
+    new_tasks = await agent_service.start_goal_agent(goal=req_body.goal, image_url=req_body.image_url or None)
     return NewTasksResponse(newTasks=new_tasks, run_id=req_body.run_id)
 
 
 ## valid 用户的 session ==> 启动一个新分析 task任务 ===> 返回分析结果 分析结果为 Analysis 任务
 @router.post("/analyze")
 async def analyze_tasks(
+    # agent_analyze_validator: 验证run任务是否存在，以及在数据库中创造一个task任务
     req_body: AgentTaskAnalyzeParams = Depends(agent_analyze_validator),
     agent_service: AgentService = Depends(get_agent_service(agent_analyze_validator)),
 ) -> Analysis:
@@ -39,7 +41,7 @@ async def analyze_tasks(
 
 ## valid 用户信息 ==> 在对应的 run 任务下面 启动一个新run任务 ==> 用来执行具体的function任务
 @router.post("/execute")
-async def execute_tasks(
+async def execute_tasks(    
     req_body: AgentTaskExecute = Depends(agent_execute_validator),
     agent_service: AgentService = Depends(
         get_agent_service(validator=agent_execute_validator, streaming=True),

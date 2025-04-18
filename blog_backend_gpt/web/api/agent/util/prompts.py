@@ -3,6 +3,7 @@ from langchain import PromptTemplate
 # Create initial tasks using plan and solve prompting
 # https://github.com/AGI-Edgerunners/Plan-and-Solve-Prompting
 start_goal_prompt = PromptTemplate(
+    # 将用户问题转换为搜索查询
     template="""You are a task creation AI called AgentGPT. 
 You answer in the "{language}" language. You have the following objective "{goal}". 
 Return a list of search queries that would be required to answer the entirety of the objective. 
@@ -20,6 +21,53 @@ query: "What is a good homemade recipe for KFC-style chicken?", answer: ["KFC st
 query: "What are the nutritional values of almond milk and soy milk?", answer: ["nutritional information of almond milk", "nutritional information of soy milk"]""",
     input_variables=["goal", "language"],
 )
+
+
+start_goal_with_image_prompt = PromptTemplate(
+    template="""You are a task creation AI called AgentGPT.
+You answer in the "{language}" language. You have the following objective: "{goal}".
+You are also given an image at "{image_url}".
+
+Carefully analyze the visual details in the image—objects, colors, contexts, text, or other important features—and explicitly reference those details in every search query you generate.
+
+Instructions:
+- Combine both the image content and the text description to create the search queries.
+- Each query MUST mention at least one specific visual element from the image (e.g., "carrots in fridge image", "flowchart on whiteboard image").
+- Keep the queries succinct and relevant.
+- Limit the total number of queries to at most 5.
+- If the task is simple or the image context is very clear, use fewer queries.
+
+Return your result ONLY as a JSON array of strings.
+
+Examples:
+
+query: "Given an image of a fridge with various vegetables, suggest recipes I can cook.", answer: [
+  "identify tomatoes and carrots in fridge image",
+  "easy recipes using leafy greens in fridge image",
+  "simple stir-fry with bell peppers from fridge image",
+  "how to season root vegetables from fridge photo",
+  "storage tips for leftover vegetables in fridge image"
+]
+
+query: "Identify all plants shown in the attached garden image.", answer: [
+  "identify rose bushes in garden image",
+  "identify lavender plants in garden image"
+]
+
+query: "From this whiteboard photo, extract key meeting points.", answer: [
+  "transcribe handwritten notes from whiteboard photo",
+  "summarize flowchart structure on whiteboard image"
+]
+
+query: "Plan a road trip based on the map shown in the image.", answer: [
+  "analyze highlighted route lines in map image",
+  "list attractions along marked route in map image",
+  "estimate travel time between cities shown on map image"
+]
+""",
+    input_variables=["goal", "language", "image_url"],
+)
+
 
 analyze_task_prompt = PromptTemplate(
     template="""

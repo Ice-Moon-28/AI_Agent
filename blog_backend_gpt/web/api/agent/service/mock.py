@@ -8,7 +8,7 @@ from blog_backend_gpt.web.api.agent.service.service import AgentService
 from blog_backend_gpt.web.api.agent.util.stream_string import stream_string
 
 
-
+# A mock implementation of the AgentService for testing purposes.
 class MockAgentService(AgentService):
     async def start_goal_agent(self, **kwargs: Any) -> List[str]:
         time.sleep(1)
